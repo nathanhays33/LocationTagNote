@@ -56,7 +56,12 @@ public class CustomAdapter extends ArrayAdapter<Note>{
     		holder.item2.setTypeface(tf);
             
         	holder.item1.setText(custom._date);
-            holder.item2.setText(custom._message); 
+        	if(custom._message.length() >20){
+        		holder.item2.setText(custom._message.substring(0, 17) + "..."); 
+        	}
+        	else{
+                holder.item2.setText(custom._message); 
+        	}
         	/*
             holder.item2.setText(Float.toString(custom._maxspeed));
             holder.item3.setText(Float.toString(custom._distance));

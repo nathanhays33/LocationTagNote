@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:ads="http://schemas.android.com/apk/lib/com.google.ads"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="fill_parent"
     android:orientation="vertical" 
     android:background="@color/white"
     android:textColor="@color/black">
@@ -11,28 +11,37 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
         <Button
-        android:id="@+id/button2"
+        android:id="@+id/mapVeiw"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Map View"
         android:layout_weight="6"
         android:onClick="mapView" 
-        android:visibility="gone"/>
+        android:visibility="gone"
+        android:background="@color/orange"
+        android:textColor="@color/white"
+        android:padding="15px"
+        android:layout_margin="5px"/>
         
         <Button
-            android:id="@+id/button1"
+            android:id="@+id/addNote"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Add Geo Note" 
             android:layout_weight="4"
-            android:onClick="addNote"/>
+            android:onClick="addNote"
+            android:background="@color/orange"
+            android:textColor="@color/white"
+            android:padding="15px"
+            android:layout_margin="5px"/>
         </LinearLayout>
 
     
     <ListView
         android:id="@+id/listview"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent" >
+        android:layout_height="fill_parent"
+        android:background="@color/white" >
 
     </ListView>
     <!--

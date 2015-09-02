@@ -19,6 +19,9 @@
         android:layout_height="wrap_content"
         android:onClick="openNote"
         android:text="View Note"
-        android:visibility="gone" />
+        android:visibility="gone"
+        android:background="@color/orange"
+        android:textColor="@color/white"
+        android:padding="15px" />
     
 </LinearLayout>

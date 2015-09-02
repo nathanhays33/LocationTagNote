@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ads="http://schemas.android.com/apk/lib/com.google.ads"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" 
+    android:background="@color/white"
+    android:textColor="@color/black">
+
+        <Button
+            android:id="@+id/addNote"
+            android:layout_width="wrap_content"
+            android:layout_height="150px"
+            android:layout_centerInParent="true"
+            android:layout_weight="4"
+            android:background="@color/orange"
+            android:onClick="addNote"
+            android:padding="15px"
+            android:text="Add Geo Note"
+            android:textColor="@color/white" />
+
+    <!--
+              <com.google.ads.AdView
+                  android:id="@+id/adView"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+
+                  android:layout_gravity="center_horizontal"
+                  ads:adSize="BANNER"
+                  ads:adUnitId="ca-app-pub-2377934805759836/7890199761"
+                  ads:loadAdOnCreate="true"
+
+                  android:gravity="bottom" />
+-->
+
+
+
+</RelativeLayout>

@@ -3,32 +3,26 @@ package com.nathanhaze.locationtagnote;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.JSONException;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.net.Uri;
-import android.os.Build;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.PopupMenu;
+import android.widget.Toast;
 import android.widget.PopupMenu.OnMenuItemClickListener;
+
+import com.google.analytics.tracking.android.EasyTracker;
+
 
 
 public class ShowList extends Activity implements OnMenuItemClickListener {
@@ -45,16 +39,24 @@ public class ShowList extends Activity implements OnMenuItemClickListener {
 	
     static boolean metric = false;
 	
-    
     public static EditText message;
+    
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		 super.onCreate(savedInstanceState);
-         setContentView(R.layout.list);
-         
+	     setContentView(R.layout.list);
+
          dh = new DatabaseHandler(this);  
-         Notes = (ArrayList<Note>) dh.getAllNotes();
-         
+
+        Notes = (ArrayList<Note>) dh.getAllNotes();
+   		Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/Chunkfive.otf");
+
+        if(Notes.size() == 0){
+            setContentView(R.layout.empty_list);
+        }
+        else{
+            setContentView(R.layout.list);
+
          lv = (ListView) findViewById(R.id.listview);
          adapter = new CustomAdapter(this,
                  R.id.listview,
@@ -74,15 +76,19 @@ public class ShowList extends Activity implements OnMenuItemClickListener {
           public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
                       int pos, long id) {
                   // TODO Auto-generated method stub
-              showYesNo(pos + 1);
+             // showYesNo(pos + 1);
+        	  showYesNo(Notes.get(pos).getID());
                   return true;
               }
           }); 
           
           if(Notes.size() >0){
-			  ((Button)findViewById(R.id.button1)).setVisibility(View.VISIBLE);	
+			  ((Button)findViewById(R.id.mapVeiw)).setVisibility(View.VISIBLE);	
+		  	  ((Button)findViewById(R.id.mapVeiw)).setTypeface(tf);
           }
-    
+
+        }
+    	((Button)findViewById(R.id.addNote)).setTypeface(tf);
 	}
 
 	public void mapView(View v){
@@ -99,10 +105,11 @@ public class ShowList extends Activity implements OnMenuItemClickListener {
 		dh.close();
 		
         if(newItems.size() == 0){
-			  ((Button)findViewById(R.id.button1)).setVisibility(View.GONE);	
+			  ((Button)findViewById(R.id.mapVeiw)).setVisibility(View.GONE);	
         }
 		
 	}
+	/*
 	public void showDialog(String title, String message){
         AlertDialog a = new AlertDialog.Builder(this).create();
         a.setTitle(title);
@@ -115,7 +122,7 @@ public class ShowList extends Activity implements OnMenuItemClickListener {
         });
         a.show();
 	}
-	
+	*/
 	public void showYesNo(final int i){
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -123,8 +130,7 @@ public class ShowList extends Activity implements OnMenuItemClickListener {
 	    //Swap Yes and NO
 	          .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 	               public void onClick(DialogInterface dialog, int id) {
-	             	  dh.deleteNote(i);
-	                  updateList();
+                     deleteNote(i);
 	               }
 	           })
 	           .setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -136,6 +142,12 @@ public class ShowList extends Activity implements OnMenuItemClickListener {
 		alertDialog.show();
 	}
 	
+	public void deleteNote(int i){
+   	  dh.deleteNote(i);
+      updateList();
+	  Toast.makeText(this, "I do not know where you are? Try enabling GPS or try again in a few moments",
+	  Toast.LENGTH_LONG).show();
+	}
 	public void showMessage(int i){
 	    Intent list_intent = new Intent(this, ShowNote.class);
      	list_intent.putExtra("index", i);
@@ -205,62 +217,20 @@ public class ShowList extends Activity implements OnMenuItemClickListener {
 		alertDialog.show();
 	}
 
-	   @Override
-	    public boolean onOptionsItemSelected(MenuItem item) {
-		   
-		// create alert dialog
-	    	final Intent mainintent = new Intent(this, ShowList.class);
-
-		   
-	    	switch (item.getItemId()) {
-   
-	    	}
-	                return(true);
-
-	        
-	    }
-		@Override
-		public boolean onCreateOptionsMenu(Menu menu) {
-			// Inflate the menu; this adds items to the action bar if it is present.
-		//	getMenuInflater().inflate(R.menu.listmenu, menu);
-			return true;
+		protected void onStop() {
+		    super.onStop();  
+		    EasyTracker.getInstance(this).activityStop(this);  // Add this method.
 		}
 		
 	    @Override
 	    public void onStart() {
 	      super.onStart();
-	    //  EasyTracker.getInstance(this).activityStart(this);  // Add this method.
+	      EasyTracker.getInstance(this).activityStart(this);  // Add this method.
 	    }
 
-	    @Override
-	    public void onStop() {
-	      super.onStop();
-	   //   EasyTracker.getInstance(this).activityStop(this);  // Add this method.
-	    }
-	    
-		   public void menu(View v){
-		    	PopupMenu popup = new PopupMenu(this, v);
-		        MenuInflater inflater = popup.getMenuInflater();
-		    //    inflater.inflate(R.menu.listmenu, popup.getMenu());
-		        popup.setOnMenuItemClickListener(this);
-		        popup.show();
-	    }
-		
-  
-		
 		@Override
 		public boolean onMenuItemClick(MenuItem item) {
-			   
-			// create alert dialog
-		    	final Intent mainintent = new Intent(this, ShowList.class);
-
-			   
-		    	switch (item.getItemId()) {
-
-		    	
-        	}
-               return(true);  
+			// TODO Auto-generated method stub
+			return false;
 		}
-		
-
 }

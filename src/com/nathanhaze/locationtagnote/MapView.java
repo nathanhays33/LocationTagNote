@@ -1,9 +1,7 @@
 package com.nathanhaze.locationtagnote;
 
-import java.io.File;
 import java.util.List;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
@@ -13,16 +11,16 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import android.support.v4.app.FragmentActivity;
-import android.support.v7.app.ActionBarActivity;
 import android.content.Intent;
-import android.graphics.Bitmap;
+import android.graphics.Typeface;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
+
+import com.google.analytics.tracking.android.EasyTracker;
+
 
 public class MapView extends FragmentActivity {
 
@@ -48,8 +46,13 @@ public class MapView extends FragmentActivity {
         Notes = db.getAllNotes();       
 
         for (Note cn : Notes) {
-           addMarker(cn.getLatitude(), cn.getLongitude(), cn.getMessage(), cn.getID());
-       }
+        	if(cn.getMessage().length() >20){
+                addMarker(cn.getLatitude(), cn.getLongitude(), cn.getMessage().substring(0, 17) + "...", cn.getID());
+        	}
+        	else{
+                addMarker(cn.getLatitude(), cn.getLongitude(), cn.getMessage(), cn.getID());
+        	}
+        } 	
         
         mMap.setOnMarkerClickListener(new OnMarkerClickListener() {
 			@Override
@@ -61,14 +64,15 @@ public class MapView extends FragmentActivity {
 			}
         });
         
-        
+		Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/Chunkfive.otf");
+  		((Button)findViewById(R.id.button1)).setTypeface(tf);        
 	}
 	
 	
 	public void addMarker(Double lat, Double lng, String title, int i){
         mMap.addMarker(new MarkerOptions()
         .position(new LatLng(lat ,lng))
-        .title(title) // AM
+        .title(title) 
         .icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_green))
         .snippet(Integer.toString(i))
         );	
@@ -150,4 +154,14 @@ public class MapView extends FragmentActivity {
             return(true);  
 	}
 	
+	protected void onStop() {
+	    super.onStop();  
+	    EasyTracker.getInstance(this).activityStop(this);  // Add this method.
+	}
+	
+    @Override
+    public void onStart() {
+      super.onStart();
+      EasyTracker.getInstance(this).activityStart(this);  // Add this method.
+    }
 }

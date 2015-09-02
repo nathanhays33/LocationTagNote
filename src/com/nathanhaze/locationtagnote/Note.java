@@ -80,4 +80,5 @@ public class Note {
 	public void setMessage (String message){
 		this._message = message;
 	}
+	
 }

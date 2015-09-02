@@ -4,42 +4,35 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolylineOptions;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnFocusChangeListener;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.PopupMenu.OnMenuItemClickListener;
+
+import com.google.analytics.tracking.android.EasyTracker;
+
 
 public class AddNote  extends FragmentActivity implements LocationListener, OnMenuItemClickListener {
 
@@ -53,6 +46,8 @@ public class AddNote  extends FragmentActivity implements LocationListener, OnMe
 	static Boolean isGPSEnabled = false;
 	static Double lat =0.0, lng =0.0;
 	
+	static GlobalVariables gv;
+	
 	private EditText note;
 	
 	static DatabaseHandler db;
@@ -63,6 +58,8 @@ public class AddNote  extends FragmentActivity implements LocationListener, OnMe
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		
+	 gv = new GlobalVariables();	
 	
 	 /***** Setup Map ****/	
    	 mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
@@ -80,8 +77,10 @@ public class AddNote  extends FragmentActivity implements LocationListener, OnMe
         location = getLastKnownLocation();
 	    // getting GPS status
 
-        if(!isGPSEnabled){
+        if(!isGPSEnabled && !gv.enableGPS){
+        	((TextView)findViewById(R.id.enableGPStext)).setVisibility(View.VISIBLE);
         	showSettingsAlert();
+        	gv.enableGPS = true;
         }
         
         mMap.moveCamera( CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()) , zoom) );
@@ -107,6 +106,8 @@ public class AddNote  extends FragmentActivity implements LocationListener, OnMe
              Log.d("NOTES", cn.getMessage());
         }
         */
+		Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/Chunkfive.otf");
+		((Button)findViewById(R.id.save)).setTypeface(tf);
 	}
 	
 	private void hideKeyboard() {
@@ -199,10 +200,21 @@ public class AddNote  extends FragmentActivity implements LocationListener, OnMe
 	}
 	
 	public void addNote(){
-   		String message = ((TextView)findViewById(R.id.note)).getText().toString();
-	    db.addNote(new Note(getTimeStamp(), message, lat, lng));
-	    Toast.makeText(this, "The note was inserted into the database!",
-	              Toast.LENGTH_LONG).show();
+		  if(lat == 0){
+	          Location here = getLastKnownLocation();       
+		  	  lat = here.getLatitude();
+	  	      lng = here.getLongitude();    
+			}
+	        if(lat !=0){ 
+	       		String message = ((TextView)findViewById(R.id.note)).getText().toString();
+	    	    db.addNote(new Note(getTimeStamp(), message, lat, lng));
+	    	    Toast.makeText(this, "The note was added!",
+	    	              Toast.LENGTH_LONG).show();
+	        }
+	        else{
+	      	    Toast.makeText(this, "I do not know where you are? Try enabling GPS or try again in a few moments",
+	  	        Toast.LENGTH_LONG).show();
+	        }           
 	}
 	
 	public String getTimeStamp() {
@@ -248,21 +260,22 @@ public class AddNote  extends FragmentActivity implements LocationListener, OnMe
 	public void onLocationChanged(Location location) {
 		lat = (double) (location.getLatitude());
 	    lng = (double) (location.getLongitude());
-        mMap.moveCamera( CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng) , zoom) );
 	}
 
 	
     @Override
     public void onProviderDisabled(String provider) {
-      Toast.makeText(this, "GPS was Disabled",
-          Toast.LENGTH_SHORT).show();
+      if(provider.equalsIgnoreCase("gps")){
+      	((TextView)findViewById(R.id.enableGPStext)).setVisibility(View.VISIBLE);
+      }
     }
     
 	
 	@Override
 	public void onProviderEnabled(String provider) {
-	    Toast.makeText(this, "Enabled new provider " + provider,
-	            Toast.LENGTH_SHORT).show();
+	      if(provider.equalsIgnoreCase("gps")){
+	        	((TextView)findViewById(R.id.enableGPStext)).setVisibility(View.GONE);
+	        }
 	}
 
 
@@ -296,5 +309,14 @@ public class AddNote  extends FragmentActivity implements LocationListener, OnMe
 	    }
 	    return bestLocation;
 	}
-	   
+	protected void onStop() {
+	    super.onStop();  
+	    EasyTracker.getInstance(this).activityStop(this);  // Add this method.
+	}
+	
+    @Override
+    public void onStart() {
+      super.onStart();
+      EasyTracker.getInstance(this).activityStart(this);  // Add this method.
+    }
 }
